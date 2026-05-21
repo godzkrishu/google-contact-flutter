@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_contact/features/contacts/presentation/widgets/contact_card.dart';
+import 'package:google_contact/features/contacts/presentation/widgets/search_bar.dart';
 import '../../domain/enitities/contact_entity.dart';
 import '../bloc/contact_bloc.dart';
 import 'add_edit_contact_page.dart';
@@ -36,23 +38,20 @@ class _ContactsPageState extends State<ContactsPage> {
     final query = _searchController.text.toLowerCase().trim();
     setState(() {
       _filteredContacts = contacts.where((c) {
-        return c.name.toLowerCase().contains(query) ||
-            c.phone.contains(query);
+        return c.name.toLowerCase().contains(query) || c.phone.contains(query);
       }).toList();
     });
   }
 
   Future<void> _confirmDelete(
-      BuildContext context,
-      ContactEntity contact,
-      ) async {
+    BuildContext context,
+    ContactEntity contact,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Delete Contact'),
-        content: Text(
-          'Are you sure you want to delete "${contact.name}"?',
-        ),
+        content: Text('Are you sure you want to delete "${contact.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -71,19 +70,14 @@ class _ContactsPageState extends State<ContactsPage> {
     );
 
     if (confirmed == true && context.mounted) {
-      context.read<ContactsBloc>().add(
-        ContactsEvent.deleteContact(contact.id),
-      );
+      context.read<ContactsBloc>().add(ContactsEvent.deleteContact(contact.id));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contacts'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('Contacts'), centerTitle: false),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed(AddEditContactPage.routeName),
         tooltip: 'Add Contact',
@@ -106,9 +100,9 @@ class _ContactsPageState extends State<ContactsPage> {
                   Text(state.message),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<ContactsBloc>()
-                        .add(const ContactsEvent.getContacts()),
+                    onPressed: () => context.read<ContactsBloc>().add(
+                      const ContactsEvent.getContacts(),
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -123,33 +117,13 @@ class _ContactsPageState extends State<ContactsPage> {
 
           return Column(
             children: [
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (_) => _filterContacts(allContacts),
-                  decoration: InputDecoration(
-                    hintText: 'Search by name or phone',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        _filterContacts(allContacts);
-                      },
-                    )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 0,
-                    ),
-                  ),
-                ),
+              CustomSearchBar(
+                controller: _searchController,
+                onChanged: (_) => _filterContacts(allContacts),
+                onClear: () {
+                  _searchController.clear();
+                  _filterContacts(allContacts);
+                },
               ),
 
               // Contact count
@@ -172,115 +146,129 @@ class _ContactsPageState extends State<ContactsPage> {
               Expanded(
                 child: contacts.isEmpty
                     ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.person_search,
-                        size: 64,
-                        color: Colors.grey.shade400,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _searchController.text.isNotEmpty
-                            ? 'No contacts match your search'
-                            : 'No contacts yet.\nTap + to add one.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                    ],
-                  ),
-                )
-                    : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-                  itemCount: contacts.length,
-                  separatorBuilder: (_, __) =>
-                  const SizedBox(height: 4),
-                  itemBuilder: (context, index) {
-                    final contact = contacts[index];
-                    return Card(
-                      margin: EdgeInsets.zero,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.grey.shade200),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        leading: CircleAvatar(
-                          radius: 22,
-                          child: Text(
-                            contact.name[0].toUpperCase(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          contact.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        subtitle: Text(
-                          contact.phone,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
-                        ),
-                        trailing: Row(
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Favorite toggle
-                            IconButton(
-                              onPressed: () {
-                                context.read<ContactsBloc>().add(
-                                  ContactsEvent.toggleFavorite(
-                                      contact.id),
-                                );
-                              },
-                              icon: Icon(
-                                contact.isFavorite
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: Colors.red,
-                                size: 20,
-                              ),
-                              tooltip: contact.isFavorite
-                                  ? 'Remove from favorites'
-                                  : 'Add to favorites',
+                            Icon(
+                              Icons.person_search,
+                              size: 64,
+                              color: Colors.grey.shade400,
                             ),
-                            // Delete
-                            IconButton(
-                              onPressed: () =>
-                                  _confirmDelete(context, contact),
-                              icon: Icon(
-                                Icons.delete_outline,
-                                color: Colors.grey.shade600,
-                                size: 20,
-                              ),
-                              tooltip: 'Delete contact',
+                            const SizedBox(height: 16),
+                            Text(
+                              _searchController.text.isNotEmpty
+                                  ? 'No contacts match your search'
+                                  : 'No contacts yet.\nTap + to add one.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey.shade600),
                             ),
                           ],
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ContactDetailsPage(
-                                contact: contact,
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                        itemCount: contacts.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 4),
+                        itemBuilder: (context, index) {
+                          final contact = contacts[index];
+                          return ContactCard(
+                            contact: contact,
+                            onTap: () {
+                              context.pushNamed(
+                                ContactDetailsPage.routeName,
+                                extra: contact,
+                              );
+                            },
+                            onFavoriteTap: () {
+                              context.read<ContactsBloc>().add(
+                                ContactsEvent.toggleFavorite(contact.id),
+                              );
+                            },
+                            onDeleteTap: () => _confirmDelete(context, contact),
+                          );
+                          return Card(
+                            margin: EdgeInsets.zero,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: Colors.grey.shade200),
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
                               ),
+                              leading: CircleAvatar(
+                                radius: 22,
+                                child: Text(
+                                  contact.name[0].toUpperCase(),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                contact.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              subtitle: Text(
+                                contact.phone,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Favorite toggle
+                                  IconButton(
+                                    onPressed: () {
+                                      context.read<ContactsBloc>().add(
+                                        ContactsEvent.toggleFavorite(
+                                          contact.id,
+                                        ),
+                                      );
+                                    },
+                                    icon: Icon(
+                                      contact.isFavorite
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: Colors.red,
+                                      size: 20,
+                                    ),
+                                    tooltip: contact.isFavorite
+                                        ? 'Remove from favorites'
+                                        : 'Add to favorites',
+                                  ),
+                                  // Delete
+                                  IconButton(
+                                    onPressed: () =>
+                                        _confirmDelete(context, contact),
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.grey.shade600,
+                                      size: 20,
+                                    ),
+                                    tooltip: 'Delete contact',
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ContactDetailsPage(contact: contact),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
                       ),
-                    );
-                  },
-                ),
               ),
             ],
           );

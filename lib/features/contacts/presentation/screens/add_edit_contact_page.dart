@@ -111,9 +111,7 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 28),
-
               // Required section
               _sectionLabel('Required'),
               const SizedBox(height: 12),
@@ -135,6 +133,7 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
+                maxLength: 10,
                 decoration: const InputDecoration(
                   labelText: 'Phone Number *',
                   prefixIcon: Icon(Icons.phone_outlined),

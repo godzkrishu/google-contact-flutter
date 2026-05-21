@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_contact/features/contacts/presentation/widgets/contact_card.dart';
+import 'package:google_contact/features/contacts/presentation/widgets/search_bar.dart';
 import '../../domain/enitities/contact_entity.dart';
 import '../bloc/contact_bloc.dart';
 import 'contact_detail_page.dart';
@@ -77,11 +79,12 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
       appBar: AppBar(title: const Text('Favorites'), centerTitle: false),
       body: BlocBuilder<ContactsBloc, ContactsState>(
         buildWhen: (previous, current) =>
-        previous.favoriteContacts != current.favoriteContacts ||
+            previous.favoriteContacts != current.favoriteContacts ||
             previous.getFavoriteContactStatus !=
                 current.getFavoriteContactStatus,
         builder: (context, state) {
-          if (state.getFavoriteContactStatus == ContactStatus.loading && state.favoriteContacts.isEmpty) {
+          if (state.getFavoriteContactStatus == ContactStatus.loading &&
+              state.favoriteContacts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -112,36 +115,17 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
 
           return Column(
             children: [
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (_) {
-                    _filterContacts(allContacts);
-                    setState(() {});
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Search favorites',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              _filterContacts(allContacts);
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 0,
-                    ),
-                  ),
-                ),
+              CustomSearchBar(
+                hintText: 'Search favorites',
+                controller: _searchController,
+                onChanged: (_) {
+                  _filterContacts(allContacts);
+                  setState(() {});
+                },
+                onClear: () {
+                  _searchController.clear();
+                  _filterContacts(allContacts);
+                },
               ),
 
               // Count
@@ -189,95 +173,21 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                         separatorBuilder: (_, __) => const SizedBox(height: 4),
                         itemBuilder: (context, index) {
                           final contact = contacts[index];
-                          return Card(
-                            margin: EdgeInsets.zero,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: Colors.grey.shade200),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              leading: CircleAvatar(
-                                radius: 22,
-                                child: Text(
-                                  (contact.name.isNotEmpty
-                                      ? contact.name[0]
-                                      : '?').toUpperCase(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              title: Text(
-                                contact.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    contact.phone,
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  if (contact.email.isNotEmpty)
-                                    Text(
-                                      contact.email,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade500,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              isThreeLine: contact.email.isNotEmpty,
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Remove favorite
-                                  IconButton(
-                                    onPressed: () {
-                                      context.read<ContactsBloc>().add(
-                                        ContactsEvent.toggleFavorite(
-                                          contact.id,
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      Icons.favorite,
-                                      color: Colors.red,
-                                      size: 20,
-                                    ),
-                                    tooltip: 'Remove from favorites',
-                                  ),
-                                  // Delete
-                                  IconButton(
-                                    onPressed: () =>
-                                        _confirmDelete(context, contact),
-                                    icon: Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.grey.shade600,
-                                      size: 20,
-                                    ),
-                                    tooltip: 'Delete contact',
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                context.pushNamed(
-                                  ContactDetailsPage.routeName,
-                                  extra: contact,
-                                );
-                              },
-                            ),
+
+                          return ContactCard(
+                            contact: contact,
+                            onTap: () {
+                              context.pushNamed(
+                                ContactDetailsPage.routeName,
+                                extra: contact,
+                              );
+                            },
+                            onFavoriteTap: () {
+                              context.read<ContactsBloc>().add(
+                                ContactsEvent.toggleFavorite(contact.id),
+                              );
+                            },
+                            onDeleteTap: () => _confirmDelete(context, contact),
                           );
                         },
                       ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/utils/app_utils.dart';
 import '../../domain/enitities/contact_entity.dart';
 import '../bloc/contact_bloc.dart';
+import '../widgets/info_tile.dart';
 import 'add_edit_contact_page.dart';
 
 class ContactDetailsPage extends StatelessWidget {
@@ -11,33 +12,14 @@ class ContactDetailsPage extends StatelessWidget {
 
   final ContactEntity contact;
 
-  const ContactDetailsPage({
-    super.key,
-    required this.contact,
-  });
-
-  Future<void> _makeCall(String phone) async {
-    final uri = Uri(scheme: 'tel', path: phone);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
-
-  Future<void> _sendEmail(String email) async {
-    final uri = Uri(scheme: 'mailto', path: email);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
+  const ContactDetailsPage({super.key, required this.contact});
 
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Delete Contact'),
-        content: Text(
-          'Are you sure you want to delete "${contact.name}"?',
-        ),
+        content: Text('Are you sure you want to delete "${contact.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -93,7 +75,7 @@ class ContactDetailsPage extends StatelessWidget {
             // Profile header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 32),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Column(
                 children: [
                   CircleAvatar(
@@ -137,24 +119,25 @@ class ContactDetailsPage extends StatelessWidget {
                       _QuickActionButton(
                         icon: Icons.call,
                         label: 'Call',
-                        onTap: () => _makeCall(contact.phone),
+                        onTap: () => makeCall(contact.phone),
                       ),
                       const SizedBox(width: 24),
                       // Email button
                       _QuickActionButton(
                         icon: Icons.email_outlined,
                         label: 'Email',
-                        onTap: () => _sendEmail(contact.email),
+                        onTap: () => sendEmail(contact.email),
                       ),
                       const SizedBox(width: 24),
                       // Favorite toggle
                       BlocBuilder<ContactsBloc, ContactsState>(
                         builder: (context, state) {
                           // Use latest state if available
-                          final isFav = state.contacts
-                              .where((c) => c.id == contact.id)
-                              .firstOrNull
-                              ?.isFavorite ??
+                          final isFav =
+                              state.contacts
+                                  .where((c) => c.id == contact.id)
+                                  .firstOrNull
+                                  ?.isFavorite ??
                               contact.isFavorite;
 
                           return _QuickActionButton(
@@ -176,56 +159,52 @@ class ContactDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
-
-            const Divider(height: 1),
-
             // Details
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  _InfoTile(
+                  InfoTile(
                     icon: Icons.phone_outlined,
                     title: 'Phone',
                     value: contact.phone,
-                    onTap: () => _makeCall(contact.phone),
+                    onTap: () => makeCall(contact.phone),
                     trailing: IconButton(
                       icon: const Icon(Icons.call, size: 20),
-                      onPressed: () => _makeCall(contact.phone),
+                      onPressed: () => makeCall(contact.phone),
                       tooltip: 'Call',
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _InfoTile(
+                  InfoTile(
                     icon: Icons.email_outlined,
                     title: 'Email',
                     value: contact.email,
-                    onTap: () => _sendEmail(contact.email),
+                    onTap: () => sendEmail(contact.email),
                   ),
                   if (contact.company != null &&
                       contact.company!.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    _InfoTile(
+                    InfoTile(
                       icon: Icons.business_outlined,
                       title: 'Company',
                       value: contact.company!,
                     ),
                   ],
-                  if (contact.notes != null &&
-                      contact.notes!.isNotEmpty) ...[
+                  if (contact.notes != null && contact.notes!.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    _InfoTile(
+                    InfoTile(
                       icon: Icons.notes_outlined,
                       title: 'Notes',
                       value: contact.notes!,
                     ),
                   ],
                   const SizedBox(height: 12),
-                  _InfoTile(
+                  InfoTile(
                     icon: Icons.calendar_today_outlined,
                     title: 'Added on',
                     value:
-                    '${contact.createdAt.day}/${contact.createdAt.month}/${contact.createdAt.year}',
+                        '${contact.createdAt.day}/${contact.createdAt.month}/${contact.createdAt.year}',
                   ),
                 ],
               ),
@@ -273,72 +252,9 @@ class _QuickActionButton extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade700,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-  final VoidCallback? onTap;
-  final Widget? trailing;
-
-  const _InfoTile({
-    required this.icon,
-    required this.title,
-    required this.value,
-    this.onTap,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade200),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 20, color: Colors.grey.shade600),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                ],
-              ),
-            ),
-            if (trailing != null) trailing!,
-          ],
-        ),
       ),
     );
   }
