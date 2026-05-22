@@ -16,7 +16,14 @@ abstract class ContactsState with _$ContactsState {
     ContactStatus getContactStatus,
     @Default(ContactStatus.initial)
     ContactStatus getFavoriteContactStatus,
-
+    @Default(ContactStatus.initial)
+    ContactStatus addContactStatus,
+    @Default(ContactStatus.initial)
+    ContactStatus updateContactStatus,
+    @Default(ContactStatus.initial)
+    ContactStatus deleteContactStatus,
+    @Default(ContactStatus.initial)
+    ContactStatus toggleFavoriteStatus,
     @Default([])
     List<ContactEntity> contacts,
     @Default([])

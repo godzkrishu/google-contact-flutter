@@ -550,7 +550,7 @@ as String,
 /// @nodoc
 mixin _$ContactsState {
 
- ContactStatus get getContactStatus; ContactStatus get getFavoriteContactStatus; List<ContactEntity> get contacts; List<ContactEntity> get favoriteContacts; String get message;
+ ContactStatus get getContactStatus; ContactStatus get getFavoriteContactStatus; ContactStatus get addContactStatus; ContactStatus get updateContactStatus; ContactStatus get deleteContactStatus; ContactStatus get toggleFavoriteStatus; List<ContactEntity> get contacts; List<ContactEntity> get favoriteContacts; String get message;
 /// Create a copy of ContactsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -561,16 +561,16 @@ $ContactsStateCopyWith<ContactsState> get copyWith => _$ContactsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactsState&&(identical(other.getContactStatus, getContactStatus) || other.getContactStatus == getContactStatus)&&(identical(other.getFavoriteContactStatus, getFavoriteContactStatus) || other.getFavoriteContactStatus == getFavoriteContactStatus)&&const DeepCollectionEquality().equals(other.contacts, contacts)&&const DeepCollectionEquality().equals(other.favoriteContacts, favoriteContacts)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactsState&&(identical(other.getContactStatus, getContactStatus) || other.getContactStatus == getContactStatus)&&(identical(other.getFavoriteContactStatus, getFavoriteContactStatus) || other.getFavoriteContactStatus == getFavoriteContactStatus)&&(identical(other.addContactStatus, addContactStatus) || other.addContactStatus == addContactStatus)&&(identical(other.updateContactStatus, updateContactStatus) || other.updateContactStatus == updateContactStatus)&&(identical(other.deleteContactStatus, deleteContactStatus) || other.deleteContactStatus == deleteContactStatus)&&(identical(other.toggleFavoriteStatus, toggleFavoriteStatus) || other.toggleFavoriteStatus == toggleFavoriteStatus)&&const DeepCollectionEquality().equals(other.contacts, contacts)&&const DeepCollectionEquality().equals(other.favoriteContacts, favoriteContacts)&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,getContactStatus,getFavoriteContactStatus,const DeepCollectionEquality().hash(contacts),const DeepCollectionEquality().hash(favoriteContacts),message);
+int get hashCode => Object.hash(runtimeType,getContactStatus,getFavoriteContactStatus,addContactStatus,updateContactStatus,deleteContactStatus,toggleFavoriteStatus,const DeepCollectionEquality().hash(contacts),const DeepCollectionEquality().hash(favoriteContacts),message);
 
 @override
 String toString() {
-  return 'ContactsState(getContactStatus: $getContactStatus, getFavoriteContactStatus: $getFavoriteContactStatus, contacts: $contacts, favoriteContacts: $favoriteContacts, message: $message)';
+  return 'ContactsState(getContactStatus: $getContactStatus, getFavoriteContactStatus: $getFavoriteContactStatus, addContactStatus: $addContactStatus, updateContactStatus: $updateContactStatus, deleteContactStatus: $deleteContactStatus, toggleFavoriteStatus: $toggleFavoriteStatus, contacts: $contacts, favoriteContacts: $favoriteContacts, message: $message)';
 }
 
 
@@ -581,7 +581,7 @@ abstract mixin class $ContactsStateCopyWith<$Res>  {
   factory $ContactsStateCopyWith(ContactsState value, $Res Function(ContactsState) _then) = _$ContactsStateCopyWithImpl;
 @useResult
 $Res call({
- ContactStatus getContactStatus, ContactStatus getFavoriteContactStatus, List<ContactEntity> contacts, List<ContactEntity> favoriteContacts, String message
+ ContactStatus getContactStatus, ContactStatus getFavoriteContactStatus, ContactStatus addContactStatus, ContactStatus updateContactStatus, ContactStatus deleteContactStatus, ContactStatus toggleFavoriteStatus, List<ContactEntity> contacts, List<ContactEntity> favoriteContacts, String message
 });
 
 
@@ -598,10 +598,14 @@ class _$ContactsStateCopyWithImpl<$Res>
 
 /// Create a copy of ContactsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? getContactStatus = null,Object? getFavoriteContactStatus = null,Object? contacts = null,Object? favoriteContacts = null,Object? message = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? getContactStatus = null,Object? getFavoriteContactStatus = null,Object? addContactStatus = null,Object? updateContactStatus = null,Object? deleteContactStatus = null,Object? toggleFavoriteStatus = null,Object? contacts = null,Object? favoriteContacts = null,Object? message = null,}) {
   return _then(_self.copyWith(
 getContactStatus: null == getContactStatus ? _self.getContactStatus : getContactStatus // ignore: cast_nullable_to_non_nullable
 as ContactStatus,getFavoriteContactStatus: null == getFavoriteContactStatus ? _self.getFavoriteContactStatus : getFavoriteContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,addContactStatus: null == addContactStatus ? _self.addContactStatus : addContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,updateContactStatus: null == updateContactStatus ? _self.updateContactStatus : updateContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,deleteContactStatus: null == deleteContactStatus ? _self.deleteContactStatus : deleteContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,toggleFavoriteStatus: null == toggleFavoriteStatus ? _self.toggleFavoriteStatus : toggleFavoriteStatus // ignore: cast_nullable_to_non_nullable
 as ContactStatus,contacts: null == contacts ? _self.contacts : contacts // ignore: cast_nullable_to_non_nullable
 as List<ContactEntity>,favoriteContacts: null == favoriteContacts ? _self.favoriteContacts : favoriteContacts // ignore: cast_nullable_to_non_nullable
 as List<ContactEntity>,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
@@ -690,10 +694,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ContactStatus getContactStatus,  ContactStatus getFavoriteContactStatus,  List<ContactEntity> contacts,  List<ContactEntity> favoriteContacts,  String message)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ContactStatus getContactStatus,  ContactStatus getFavoriteContactStatus,  ContactStatus addContactStatus,  ContactStatus updateContactStatus,  ContactStatus deleteContactStatus,  ContactStatus toggleFavoriteStatus,  List<ContactEntity> contacts,  List<ContactEntity> favoriteContacts,  String message)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ContactsState() when $default != null:
-return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.contacts,_that.favoriteContacts,_that.message);case _:
+return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.addContactStatus,_that.updateContactStatus,_that.deleteContactStatus,_that.toggleFavoriteStatus,_that.contacts,_that.favoriteContacts,_that.message);case _:
   return orElse();
 
 }
@@ -711,10 +715,10 @@ return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.cont
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ContactStatus getContactStatus,  ContactStatus getFavoriteContactStatus,  List<ContactEntity> contacts,  List<ContactEntity> favoriteContacts,  String message)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ContactStatus getContactStatus,  ContactStatus getFavoriteContactStatus,  ContactStatus addContactStatus,  ContactStatus updateContactStatus,  ContactStatus deleteContactStatus,  ContactStatus toggleFavoriteStatus,  List<ContactEntity> contacts,  List<ContactEntity> favoriteContacts,  String message)  $default,) {final _that = this;
 switch (_that) {
 case _ContactsState():
-return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.contacts,_that.favoriteContacts,_that.message);case _:
+return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.addContactStatus,_that.updateContactStatus,_that.deleteContactStatus,_that.toggleFavoriteStatus,_that.contacts,_that.favoriteContacts,_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -731,10 +735,10 @@ return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.cont
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ContactStatus getContactStatus,  ContactStatus getFavoriteContactStatus,  List<ContactEntity> contacts,  List<ContactEntity> favoriteContacts,  String message)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ContactStatus getContactStatus,  ContactStatus getFavoriteContactStatus,  ContactStatus addContactStatus,  ContactStatus updateContactStatus,  ContactStatus deleteContactStatus,  ContactStatus toggleFavoriteStatus,  List<ContactEntity> contacts,  List<ContactEntity> favoriteContacts,  String message)?  $default,) {final _that = this;
 switch (_that) {
 case _ContactsState() when $default != null:
-return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.contacts,_that.favoriteContacts,_that.message);case _:
+return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.addContactStatus,_that.updateContactStatus,_that.deleteContactStatus,_that.toggleFavoriteStatus,_that.contacts,_that.favoriteContacts,_that.message);case _:
   return null;
 
 }
@@ -746,11 +750,15 @@ return $default(_that.getContactStatus,_that.getFavoriteContactStatus,_that.cont
 
 
 class _ContactsState implements ContactsState {
-  const _ContactsState({this.getContactStatus = ContactStatus.initial, this.getFavoriteContactStatus = ContactStatus.initial, final  List<ContactEntity> contacts = const [], final  List<ContactEntity> favoriteContacts = const [], this.message = ''}): _contacts = contacts,_favoriteContacts = favoriteContacts;
+  const _ContactsState({this.getContactStatus = ContactStatus.initial, this.getFavoriteContactStatus = ContactStatus.initial, this.addContactStatus = ContactStatus.initial, this.updateContactStatus = ContactStatus.initial, this.deleteContactStatus = ContactStatus.initial, this.toggleFavoriteStatus = ContactStatus.initial, final  List<ContactEntity> contacts = const [], final  List<ContactEntity> favoriteContacts = const [], this.message = ''}): _contacts = contacts,_favoriteContacts = favoriteContacts;
   
 
 @override@JsonKey() final  ContactStatus getContactStatus;
 @override@JsonKey() final  ContactStatus getFavoriteContactStatus;
+@override@JsonKey() final  ContactStatus addContactStatus;
+@override@JsonKey() final  ContactStatus updateContactStatus;
+@override@JsonKey() final  ContactStatus deleteContactStatus;
+@override@JsonKey() final  ContactStatus toggleFavoriteStatus;
  final  List<ContactEntity> _contacts;
 @override@JsonKey() List<ContactEntity> get contacts {
   if (_contacts is EqualUnmodifiableListView) return _contacts;
@@ -777,16 +785,16 @@ _$ContactsStateCopyWith<_ContactsState> get copyWith => __$ContactsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactsState&&(identical(other.getContactStatus, getContactStatus) || other.getContactStatus == getContactStatus)&&(identical(other.getFavoriteContactStatus, getFavoriteContactStatus) || other.getFavoriteContactStatus == getFavoriteContactStatus)&&const DeepCollectionEquality().equals(other._contacts, _contacts)&&const DeepCollectionEquality().equals(other._favoriteContacts, _favoriteContacts)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactsState&&(identical(other.getContactStatus, getContactStatus) || other.getContactStatus == getContactStatus)&&(identical(other.getFavoriteContactStatus, getFavoriteContactStatus) || other.getFavoriteContactStatus == getFavoriteContactStatus)&&(identical(other.addContactStatus, addContactStatus) || other.addContactStatus == addContactStatus)&&(identical(other.updateContactStatus, updateContactStatus) || other.updateContactStatus == updateContactStatus)&&(identical(other.deleteContactStatus, deleteContactStatus) || other.deleteContactStatus == deleteContactStatus)&&(identical(other.toggleFavoriteStatus, toggleFavoriteStatus) || other.toggleFavoriteStatus == toggleFavoriteStatus)&&const DeepCollectionEquality().equals(other._contacts, _contacts)&&const DeepCollectionEquality().equals(other._favoriteContacts, _favoriteContacts)&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,getContactStatus,getFavoriteContactStatus,const DeepCollectionEquality().hash(_contacts),const DeepCollectionEquality().hash(_favoriteContacts),message);
+int get hashCode => Object.hash(runtimeType,getContactStatus,getFavoriteContactStatus,addContactStatus,updateContactStatus,deleteContactStatus,toggleFavoriteStatus,const DeepCollectionEquality().hash(_contacts),const DeepCollectionEquality().hash(_favoriteContacts),message);
 
 @override
 String toString() {
-  return 'ContactsState(getContactStatus: $getContactStatus, getFavoriteContactStatus: $getFavoriteContactStatus, contacts: $contacts, favoriteContacts: $favoriteContacts, message: $message)';
+  return 'ContactsState(getContactStatus: $getContactStatus, getFavoriteContactStatus: $getFavoriteContactStatus, addContactStatus: $addContactStatus, updateContactStatus: $updateContactStatus, deleteContactStatus: $deleteContactStatus, toggleFavoriteStatus: $toggleFavoriteStatus, contacts: $contacts, favoriteContacts: $favoriteContacts, message: $message)';
 }
 
 
@@ -797,7 +805,7 @@ abstract mixin class _$ContactsStateCopyWith<$Res> implements $ContactsStateCopy
   factory _$ContactsStateCopyWith(_ContactsState value, $Res Function(_ContactsState) _then) = __$ContactsStateCopyWithImpl;
 @override @useResult
 $Res call({
- ContactStatus getContactStatus, ContactStatus getFavoriteContactStatus, List<ContactEntity> contacts, List<ContactEntity> favoriteContacts, String message
+ ContactStatus getContactStatus, ContactStatus getFavoriteContactStatus, ContactStatus addContactStatus, ContactStatus updateContactStatus, ContactStatus deleteContactStatus, ContactStatus toggleFavoriteStatus, List<ContactEntity> contacts, List<ContactEntity> favoriteContacts, String message
 });
 
 
@@ -814,10 +822,14 @@ class __$ContactsStateCopyWithImpl<$Res>
 
 /// Create a copy of ContactsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? getContactStatus = null,Object? getFavoriteContactStatus = null,Object? contacts = null,Object? favoriteContacts = null,Object? message = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? getContactStatus = null,Object? getFavoriteContactStatus = null,Object? addContactStatus = null,Object? updateContactStatus = null,Object? deleteContactStatus = null,Object? toggleFavoriteStatus = null,Object? contacts = null,Object? favoriteContacts = null,Object? message = null,}) {
   return _then(_ContactsState(
 getContactStatus: null == getContactStatus ? _self.getContactStatus : getContactStatus // ignore: cast_nullable_to_non_nullable
 as ContactStatus,getFavoriteContactStatus: null == getFavoriteContactStatus ? _self.getFavoriteContactStatus : getFavoriteContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,addContactStatus: null == addContactStatus ? _self.addContactStatus : addContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,updateContactStatus: null == updateContactStatus ? _self.updateContactStatus : updateContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,deleteContactStatus: null == deleteContactStatus ? _self.deleteContactStatus : deleteContactStatus // ignore: cast_nullable_to_non_nullable
+as ContactStatus,toggleFavoriteStatus: null == toggleFavoriteStatus ? _self.toggleFavoriteStatus : toggleFavoriteStatus // ignore: cast_nullable_to_non_nullable
 as ContactStatus,contacts: null == contacts ? _self._contacts : contacts // ignore: cast_nullable_to_non_nullable
 as List<ContactEntity>,favoriteContacts: null == favoriteContacts ? _self._favoriteContacts : favoriteContacts // ignore: cast_nullable_to_non_nullable
 as List<ContactEntity>,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable

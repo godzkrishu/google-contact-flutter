@@ -16,7 +16,11 @@ class ContactsRemoteDataSourceImpl implements ContactsRemoteDataSource {
         .collection(collection)
         .orderBy('name')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => ContactModel.fromJson(doc.data())).toList(),);
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ContactModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   @override
@@ -24,14 +28,22 @@ class ContactsRemoteDataSourceImpl implements ContactsRemoteDataSource {
     return firestore
         .collection(collection)
         .where('isFavorite', isEqualTo: true)
+        .orderBy('name')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => ContactModel.fromJson(doc.data())).toList(),);
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ContactModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   @override
   Future<void> addContact(ContactModel contact) async {
     await _checkDuplicatePhone(contact.phone);
-    await firestore.collection(collection).doc(contact.id).set(contact.toJson());
+    await firestore
+        .collection(collection)
+        .doc(contact.id)
+        .set(contact.toJson());
   }
 
   @override
