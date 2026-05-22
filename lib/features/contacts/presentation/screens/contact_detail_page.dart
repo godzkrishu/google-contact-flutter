@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/app_toast.dart';
 import '../../../../core/utils/app_utils.dart';
 import '../../domain/enitities/contact_entity.dart';
 import '../bloc/contact_bloc.dart';
 import '../widgets/info_tile.dart';
+import '../widgets/quick_action_button.dart';
 import 'add_edit_contact_page.dart';
 
 class ContactDetailsPage extends StatelessWidget {
@@ -44,218 +46,357 @@ class ContactDetailsPage extends StatelessWidget {
     );
   }
 
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+
+      builder: (_) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+
+          contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+
+          title: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+
+                child: const Icon(Icons.error_outline, color: Colors.red),
+              ),
+
+              const SizedBox(width: 12),
+
+              const Text(
+                'Something went wrong',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+
+          content: Text(
+            message,
+            style: TextStyle(color: Colors.grey.shade700, height: 1.4),
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contact Details'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddEditContactPage(contact: contact),
+    return BlocListener<ContactsBloc, ContactsState>(
+      listener: (context, state) {
+        /// DELETE SUCCESS
+        if (state.deleteContactStatus == ContactStatus.completed) {
+          AppToast.showSuccess('Contact deleted successfully');
+
+          Navigator.pop(context);
+        }
+
+        /// DELETE ERROR
+        if (state.deleteContactStatus == ContactStatus.error) {
+          _showErrorDialog(context, state.message);
+        }
+
+        /// FAVORITE ERROR
+        if (state.toggleFavoriteStatus == ContactStatus.error) {
+          AppToast.showError(state.message);
+        }
+      },
+
+      child: BlocBuilder<ContactsBloc, ContactsState>(
+        builder: (context, state) {
+          final bool isDeleting =
+              state.deleteContactStatus == ContactStatus.loading;
+
+          final bool isFavoriteLoading =
+              state.toggleFavoriteStatus == ContactStatus.loading;
+
+          final updatedContact = state.contacts
+              .where((c) => c.id == contact.id)
+              .firstOrNull;
+
+          final currentContact = updatedContact ?? contact;
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Contact Details'),
+
+              actions: [
+
+                /// EDIT
+                IconButton(
+                  onPressed: isDeleting
+                      ? null
+                      : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddEditContactPage(
+                          contact: currentContact,
+                        ),
+                      ),
+                    );
+                  },
+
+                  icon: const Icon(Icons.edit_outlined),
                 ),
-              );
-            },
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit',
-          ),
-          IconButton(
-            onPressed: () => _showDeleteDialog(context),
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Delete',
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Profile header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 48,
-                    child: Text(
-                      contact.name[0].toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    contact.name,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (contact.company != null &&
-                      contact.company!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      contact.company!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
 
-                  const SizedBox(height: 16),
+                /// DELETE
+                IconButton(
+                  onPressed: isDeleting
+                      ? null
+                      : () => _showDeleteDialog(context),
 
-                  // Quick action buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  icon: isDeleting
+                      ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+
+            body: Stack(
+              children: [
+
+                /// MAIN UI
+                SingleChildScrollView(
+                  child: Column(
                     children: [
-                      // Call button
-                      _QuickActionButton(
-                        icon: Icons.call,
-                        label: 'Call',
-                        onTap: () => makeCall(contact.phone),
-                      ),
-                      const SizedBox(width: 24),
-                      // Email button
-                      _QuickActionButton(
-                        icon: Icons.email_outlined,
-                        label: 'Email',
-                        onTap: () => sendEmail(contact.email),
-                      ),
-                      const SizedBox(width: 24),
-                      // Favorite toggle
-                      BlocBuilder<ContactsBloc, ContactsState>(
-                        builder: (context, state) {
-                          // Use latest state if available
-                          final isFav =
-                              state.contacts
-                                  .where((c) => c.id == contact.id)
-                                  .firstOrNull
-                                  ?.isFavorite ??
-                              contact.isFavorite;
 
-                          return _QuickActionButton(
-                            icon: isFav
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            label: isFav ? 'Unfavorite' : 'Favorite',
-                            iconColor: Colors.red,
-                            onTap: () {
-                              context.read<ContactsBloc>().add(
-                                ContactsEvent.toggleFavorite(contact.id),
-                              );
-                            },
-                          );
-                        },
+                      /// HEADER
+                      Container(
+                        width: double.infinity,
+
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 28,
+                        ),
+
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.08),
+
+                              Colors.transparent,
+                            ],
+
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+
+                        child: Column(
+                          children: [
+
+                            /// AVATAR
+                            Hero(
+                              tag: currentContact.id,
+
+                              child: CircleAvatar(
+                                radius: 50,
+
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.12),
+
+                                child: Text(
+                                  currentContact.name[0]
+                                      .toUpperCase(),
+
+                                  style: TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            /// NAME
+                            Text(
+                              currentContact.name,
+
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+
+                            /// COMPANY
+                            if (currentContact.company != null &&
+                                currentContact.company!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+
+                                child: Text(
+                                  currentContact.company!,
+
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ),
+
+                            const SizedBox(height: 26),
+
+                            /// QUICK ACTIONS
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.center,
+
+                              children: [
+
+                                /// CALL
+                                QuickActionButton(
+                                  icon: Icons.call,
+                                  label: 'Call',
+                                  isLoading: false,
+                                  onTap: () => makeCall(
+                                    currentContact.phone,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 22),
+
+                                /// EMAIL
+                                QuickActionButton(
+                                  icon: Icons.email_outlined,
+                                  label: 'Email',
+                                  isLoading: false,
+                                  onTap: () => sendEmail(
+                                    currentContact.email,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 22),
+
+                                /// FAVORITE
+                                QuickActionButton(
+                                  icon: currentContact.isFavorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+
+                                  label: currentContact.isFavorite
+                                      ? 'Favorited'
+                                      : 'Favorite',
+
+                                  iconColor: Colors.red,
+
+                                  isLoading: isFavoriteLoading,
+
+                                  onTap: () {
+                                    context
+                                        .read<ContactsBloc>()
+                                        .add(
+                                      ContactsEvent
+                                          .toggleFavorite(
+                                        currentContact.id,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      /// DETAILS
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+
+                        child: Column(
+                          children: [
+
+                            InfoTile(
+                              icon: Icons.phone_outlined,
+                              title: 'Phone',
+                              value: currentContact.phone,
+
+                              onTap: () => makeCall(
+                                currentContact.phone,
+                              ),
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            InfoTile(
+                              icon: Icons.email_outlined,
+                              title: 'Email',
+                              value: currentContact.email,
+
+                              onTap: () => sendEmail(
+                                currentContact.email,
+                              ),
+                            ),
+
+                            if (currentContact.notes != null &&
+                                currentContact.notes!.isNotEmpty) ...[
+
+                              const SizedBox(height: 14),
+
+                              InfoTile(
+                                icon: Icons.notes_outlined,
+                                title: 'Notes',
+                                value: currentContact.notes!,
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+
+                /// FULL SCREEN LOADER
+                if (isDeleting)
+                  Container(
+                    color: Colors.black.withOpacity(0.08),
+
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
             ),
-            // Details
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  InfoTile(
-                    icon: Icons.phone_outlined,
-                    title: 'Phone',
-                    value: contact.phone,
-                    onTap: () => makeCall(contact.phone),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.call, size: 20),
-                      onPressed: () => makeCall(contact.phone),
-                      tooltip: 'Call',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  InfoTile(
-                    icon: Icons.email_outlined,
-                    title: 'Email',
-                    value: contact.email,
-                    onTap: () => sendEmail(contact.email),
-                  ),
-                  if (contact.company != null &&
-                      contact.company!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    InfoTile(
-                      icon: Icons.business_outlined,
-                      title: 'Company',
-                      value: contact.company!,
-                    ),
-                  ],
-                  if (contact.notes != null && contact.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    InfoTile(
-                      icon: Icons.notes_outlined,
-                      title: 'Notes',
-                      value: contact.notes!,
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  InfoTile(
-                    icon: Icons.calendar_today_outlined,
-                    title: 'Added on',
-                    value:
-                        '${contact.createdAt.day}/${contact.createdAt.month}/${contact.createdAt.year}',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-class _QuickActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? iconColor;
 
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor ?? Theme.of(context).colorScheme.primary,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-          ),
-        ],
-      ),
-    );
-  }
-}

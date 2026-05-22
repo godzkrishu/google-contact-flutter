@@ -104,6 +104,10 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
         }
       },
       builder: (context, state) {
+        final bool isLoading =
+            state.addContactStatus == ContactStatus.loading ||
+            state.updateContactStatus == ContactStatus.loading;
+
         return Scaffold(
           appBar: AppBar(title: Text(_isEdit ? 'Edit Contact' : 'Add Contact')),
           body: SingleChildScrollView(
@@ -172,17 +176,18 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'Email Address *',
+                      labelText: 'Email Address',
                       prefixIcon: Icon(Icons.email_outlined),
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Email is required';
-                      }
-                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim())) {
-                        return 'Enter a valid email';
-                      }
+
+                      // if (v == null || v.trim().isEmpty) {
+                      //   return 'Email is required';
+                      // }
+                      // if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim())) {
+                      //   return 'Enter a valid email';
+                      // }
                       return null;
                     },
                   ),
@@ -240,12 +245,27 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
                   // Save button
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 52,
                     child: ElevatedButton.icon(
-                      onPressed: _submit,
-                      icon: Icon(_isEdit ? Icons.save_outlined : Icons.add),
+                      onPressed: isLoading ? null : _submit,
+
+                      icon: isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Icon(_isEdit ? Icons.save_outlined : Icons.add),
+
                       label: Text(
-                        _isEdit ? 'Update Contact' : 'Save Contact',
+                        isLoading
+                            ? 'Saving...'
+                            : _isEdit
+                            ? 'Update Contact'
+                            : 'Save Contact',
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
