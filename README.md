@@ -181,6 +181,7 @@ Handled Errors:
 
 # Future Improvements
 
+- Authentication 
 - Profile image upload
 - Local storage caching
 - Contact grouping
