@@ -78,21 +78,15 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favorites'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('Favorites'), centerTitle: false),
 
       body: BlocConsumer<ContactsBloc, ContactsState>(
-        listenWhen: (previous, current) =>
-        previous.message != current.message,
+        listenWhen: (previous, current) => previous.message != current.message,
 
         listener: (context, state) {
-
           /// ERROR TOAST
           if (state.deleteContactStatus == ContactStatus.error ||
               state.toggleFavoriteStatus == ContactStatus.error) {
-
             AppToast.showError(state.message);
           }
 
@@ -103,40 +97,29 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
         },
 
         buildWhen: (previous, current) =>
-        previous.favoriteContacts != current.favoriteContacts ||
+            previous.favoriteContacts != current.favoriteContacts ||
             previous.getFavoriteContactStatus !=
                 current.getFavoriteContactStatus ||
-            previous.deleteContactStatus !=
-                current.deleteContactStatus ||
-            previous.toggleFavoriteStatus !=
-                current.toggleFavoriteStatus,
+            previous.deleteContactStatus != current.deleteContactStatus ||
+            previous.toggleFavoriteStatus != current.toggleFavoriteStatus,
 
         builder: (context, state) {
-
-          /// LOADINGa
-          if (state.getFavoriteContactStatus ==
-              ContactStatus.loading &&
+          //loding
+          if (state.getFavoriteContactStatus == ContactStatus.loading &&
               state.favoriteContacts.isEmpty) {
-
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           /// ERROR UI
-          if (state.getFavoriteContactStatus ==
-              ContactStatus.error) {
-
+          if (state.getFavoriteContactStatus == ContactStatus.error) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
 
                 child: Column(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
 
                   children: [
-
                     Container(
                       width: 90,
                       height: 90,
@@ -181,8 +164,7 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                     ElevatedButton.icon(
                       onPressed: () {
                         context.read<ContactsBloc>().add(
-                          const ContactsEvent
-                              .getFavoriteContacts(),
+                          const ContactsEvent.getFavoriteContacts(),
                         );
                       },
 
@@ -191,10 +173,7 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                       label: const Text('Try Again'),
 
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(
-                          160,
-                          48,
-                        ),
+                        minimumSize: const Size(160, 48),
                       ),
                     ),
                   ],
@@ -209,21 +188,16 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
               ? allContacts
               : _filteredContacts;
 
-          final isDeleting =
-              state.deleteContactStatus ==
-                  ContactStatus.loading;
+          final isDeleting = state.deleteContactStatus == ContactStatus.loading;
 
           final isFavoriteLoading =
-              state.toggleFavoriteStatus ==
-                  ContactStatus.loading;
+              state.toggleFavoriteStatus == ContactStatus.loading;
 
           return Stack(
             children: [
-
               /// MAIN UI
               Column(
                 children: [
-
                   /// SEARCH
                   CustomSearchBar(
                     hintText: 'Search favorites',
@@ -244,12 +218,7 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                   /// COUNT
                   if (allContacts.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        16,
-                        0,
-                        16,
-                        6,
-                      ),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
 
                       child: Align(
                         alignment: Alignment.centerLeft,
@@ -269,137 +238,13 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                   /// EMPTY UI
                   Expanded(
                     child: contacts.isEmpty
-                        ? Center(
-                      child: Padding(
-                        padding:
-                        const EdgeInsets.all(24),
-
-                        child: Column(
-                          mainAxisAlignment:
-                          MainAxisAlignment.center,
-
-                          children: [
-
-                            Container(
-                              width: 100,
-                              height: 100,
-
-                              decoration: BoxDecoration(
-                                color: Colors.red
-                                    .withOpacity(0.08),
-
-                                shape: BoxShape.circle,
-                              ),
-
-                              child: Icon(
-                                Icons.favorite_border,
-                                size: 44,
-                                color: Colors.red.shade300,
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Text(
-                              _searchController
-                                  .text
-                                  .isNotEmpty
-                                  ? 'No favorites found'
-                                  : 'No favorite contacts yet',
-
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight:
-                                FontWeight.w700,
-                              ),
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            Text(
-                              _searchController
-                                  .text
-                                  .isNotEmpty
-                                  ? 'Try searching with another keyword'
-                                  : 'Tap the heart icon on contacts to add them here.',
-
-                              textAlign: TextAlign.center,
-
-                              style: TextStyle(
-                                color:
-                                Colors.grey.shade600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-
-                    /// LIST
-                        : ListView.separated(
-                      padding:
-                      const EdgeInsets.fromLTRB(
-                        16,
-                        4,
-                        16,
-                        24,
-                      ),
-
-                      itemCount: contacts.length,
-
-                      separatorBuilder: (_, __) =>
-                      const SizedBox(height: 8),
-
-                      itemBuilder: (context, index) {
-
-                        final contact =
-                        contacts[index];
-
-                        return Opacity(
-                          opacity: isDeleting
-                              ? 0.7
-                              : 1,
-
-                          child: ContactCard(
-                            contact: contact,
-
-                            onTap: () {
-                              context.pushNamed(
-                                ContactDetailsPage
-                                    .routeName,
-
-                                extra: contact,
-                              );
-                            },
-
-                            onFavoriteTap:
-                            isFavoriteLoading
-                                ? () {}
-                                : () {
-                              context
-                                  .read<
-                                  ContactsBloc>()
-                                  .add(
-                                ContactsEvent
-                                    .toggleFavorite(
-                                  contact
-                                      .id,
-                                ),
-                              );
-                            },
-
-                            onDeleteTap: isDeleting
-                                ? () {}
-                                : () =>
-                                _confirmDelete(
-                                  context,
-                                  contact,
-                                ),
+                        ? emptyWidget()
+                        /// LIST
+                        : contactListWidget(
+                            contacts,
+                            isDeleting,
+                            isFavoriteLoading,
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),
@@ -409,13 +254,106 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                 Container(
                   color: Colors.black.withOpacity(0.08),
 
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: const Center(child: CircularProgressIndicator()),
                 ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget contactListWidget(
+    List<ContactEntity> contacts,
+    bool isDeleting,
+    bool isFavoriteLoading,
+  ) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+
+      itemCount: contacts.length,
+
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+
+      itemBuilder: (context, index) {
+        final contact = contacts[index];
+
+        return Opacity(
+          opacity: isDeleting ? 0.7 : 1,
+
+          child: ContactCard(
+            contact: contact,
+
+            onTap: () {
+              context.pushNamed(ContactDetailsPage.routeName, extra: contact);
+            },
+
+            onFavoriteTap: isFavoriteLoading
+                ? () {}
+                : () {
+                    context.read<ContactsBloc>().add(
+                      ContactsEvent.toggleFavorite(contact.id),
+                    );
+                  },
+
+            onDeleteTap: isDeleting
+                ? () {}
+                : () => _confirmDelete(context, contact),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget emptyWidget() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.08),
+
+                shape: BoxShape.circle,
+              ),
+
+              child: Icon(
+                Icons.favorite_border,
+                size: 44,
+                color: Colors.red.shade300,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              _searchController.text.isNotEmpty
+                  ? 'No favorites found'
+                  : 'No favorite contacts yet',
+
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              _searchController.text.isNotEmpty
+                  ? 'Try searching with another keyword'
+                  : 'Tap the heart icon on contacts to add them here.',
+
+              textAlign: TextAlign.center,
+
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }

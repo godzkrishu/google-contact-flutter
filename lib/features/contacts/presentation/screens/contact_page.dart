@@ -106,9 +106,7 @@ class _ContactsPageState extends State<ContactsPage> {
           }
         },
 
-        /// BUILDER
         builder: (context, state) {
-          /// INITIAL LOADING
           if (state.getContactStatus == ContactStatus.loading &&
               state.contacts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -116,75 +114,7 @@ class _ContactsPageState extends State<ContactsPage> {
 
           /// ERROR UI
           if (state.getContactStatus == ContactStatus.error) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
-                        shape: BoxShape.circle,
-                      ),
-
-                      child: const Icon(
-                        Icons.cloud_off_rounded,
-                        size: 42,
-                        color: Colors.red,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      'Failed to load contacts',
-
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      state.message,
-
-                      textAlign: TextAlign.center,
-
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        context.read<ContactsBloc>().add(
-                          const ContactsEvent.getContacts(),
-                        );
-                      },
-
-                      icon: const Icon(Icons.refresh),
-
-                      label: const Text('Try Again'),
-
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(160, 48),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return emptyWidget(state, context);
           }
 
           final allContacts = state.contacts;
@@ -306,48 +236,7 @@ class _ContactsPageState extends State<ContactsPage> {
                             ),
                           )
                         /// CONTACT LIST
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-
-                            itemCount: contacts.length,
-
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 8),
-
-                            itemBuilder: (context, index) {
-                              final contact = contacts[index];
-
-                              return Opacity(
-                                opacity: isDeleting ? 0.7 : 1,
-
-                                child: ContactCard(
-                                  contact: contact,
-
-                                  onTap: () {
-                                    context.pushNamed(
-                                      ContactDetailsPage.routeName,
-
-                                      extra: contact,
-                                    );
-                                  },
-
-                                  onFavoriteTap: isFavoriteLoading
-                                      ? () {}
-                                      : () {
-                                          context.read<ContactsBloc>().add(
-                                            ContactsEvent.toggleFavorite(
-                                              contact.id,
-                                            ),
-                                          );
-                                        },
-
-                                  onDeleteTap: isDeleting
-                                      ? () {}
-                                      : () => _confirmDelete(context, contact),
-                                ),
-                              );
-                            },
-                          ),
+                        : contactListWidget(contacts, isDeleting, isFavoriteLoading),
                   ),
                 ],
               ),
@@ -364,5 +253,122 @@ class _ContactsPageState extends State<ContactsPage> {
         },
       ),
     );
+  }
+
+  ListView contactListWidget(List<ContactEntity> contacts, bool isDeleting, bool isFavoriteLoading) {
+    return ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+
+                          itemCount: contacts.length,
+
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+
+                          itemBuilder: (context, index) {
+                            final contact = contacts[index];
+
+                            return Opacity(
+                              opacity: isDeleting ? 0.7 : 1,
+
+                              child: ContactCard(
+                                contact: contact,
+
+                                onTap: () {
+                                  context.pushNamed(
+                                    ContactDetailsPage.routeName,
+
+                                    extra: contact,
+                                  );
+                                },
+
+                                onFavoriteTap: isFavoriteLoading
+                                    ? () {}
+                                    : () {
+                                        context.read<ContactsBloc>().add(
+                                          ContactsEvent.toggleFavorite(
+                                            contact.id,
+                                          ),
+                                        );
+                                      },
+
+                                onDeleteTap: isDeleting
+                                    ? () {}
+                                    : () => _confirmDelete(context, contact),
+                              ),
+                            );
+                          },
+                        );
+  }
+
+ Widget emptyWidget(ContactsState state, BuildContext context) {
+    return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  Container(
+                    width: 90,
+                    height: 90,
+
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+
+                    child: const Icon(
+                      Icons.cloud_off_rounded,
+                      size: 42,
+                      color: Colors.red,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    'Failed to load contacts',
+
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    state.message,
+
+                    textAlign: TextAlign.center,
+
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<ContactsBloc>().add(
+                        const ContactsEvent.getContacts(),
+                      );
+                    },
+
+                    icon: const Icon(Icons.refresh),
+
+                    label: const Text('Try Again'),
+
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(160, 48),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
   }
 }
