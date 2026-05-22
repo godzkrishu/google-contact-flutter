@@ -24,9 +24,13 @@ A modern Google Contacts inspired Flutter application built using Clean Architec
 
 # Screenshots
 
-| Contacts | Favorites | Details |
-|----------|------------|----------|
-| Add screenshots here | Add screenshots here | Add screenshots here |
+| Contacts | Favorites |
+|-----------|------------|
+| ![](assets/screenshots/contacts.png) | ![](assets/screenshots/favorites.png) |
+
+| Add Contact | Details |
+|--------------|----------|
+| ![](assets/screenshots/add_contact.png) | ![](assets/screenshots/details.png) |
 
 ---
 
