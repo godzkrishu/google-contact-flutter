@@ -124,7 +124,7 @@ flutter pub get
 # Installation
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/godzkrishu/google-contact-flutter
 
 cd google_contact
 
