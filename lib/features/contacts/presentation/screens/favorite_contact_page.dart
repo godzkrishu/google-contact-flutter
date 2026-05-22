@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_contact/features/contacts/presentation/widgets/contact_card.dart';
-import 'package:google_contact/features/contacts/presentation/widgets/search_bar.dart';
 import '../../../../core/utils/app_toast.dart';
 import '../../domain/enitities/contact_entity.dart';
 import '../bloc/contact_bloc.dart';
-import 'contact_detail_page.dart';
+import '../widgets/contact_count_text.dart';
+import '../widgets/contact_listview.dart';
+import '../widgets/delete_dialog.dart';
+import '../widgets/search_bar.dart';
+import '../widgets/status_view.dart';
 
 class FavoriteContactsPage extends StatefulWidget {
   static const String routeName = "favorite-contact-page";
@@ -20,11 +21,13 @@ class FavoriteContactsPage extends StatefulWidget {
 
 class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
   final TextEditingController _searchController = TextEditingController();
+
   List<ContactEntity> _filteredContacts = [];
 
   @override
   void initState() {
     super.initState();
+
     context.read<ContactsBloc>().add(const ContactsEvent.getFavoriteContacts());
   }
 
@@ -36,6 +39,7 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
 
   void _filterContacts(List<ContactEntity> contacts) {
     final query = _searchController.text.toLowerCase().trim();
+
     setState(() {
       _filteredContacts = contacts.where((c) {
         return c.name.toLowerCase().contains(query) || c.phone.contains(query);
@@ -43,38 +47,14 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
     });
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    ContactEntity contact,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Delete Contact'),
-        content: Text('Are you sure you want to delete "${contact.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _deleteContact(ContactEntity contact) async {
+    final confirmed = await showDeleteContactDialog(context, contact.name);
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       context.read<ContactsBloc>().add(ContactsEvent.deleteContact(contact.id));
     }
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,13 +64,11 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
         listenWhen: (previous, current) => previous.message != current.message,
 
         listener: (context, state) {
-          /// ERROR TOAST
           if (state.deleteContactStatus == ContactStatus.error ||
               state.toggleFavoriteStatus == ContactStatus.error) {
             AppToast.showError(state.message);
           }
 
-          /// SUCCESS TOAST
           if (state.deleteContactStatus == ContactStatus.completed) {
             AppToast.showSuccess('Contact deleted');
           }
@@ -104,80 +82,28 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
             previous.toggleFavoriteStatus != current.toggleFavoriteStatus,
 
         builder: (context, state) {
-          //loding
           if (state.getFavoriteContactStatus == ContactStatus.loading &&
               state.favoriteContacts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          /// ERROR UI
           if (state.getFavoriteContactStatus == ContactStatus.error) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
+            return StatusView(
+              icon: Icons.cloud_off_rounded,
+              color: Colors.red,
+              title: 'Something went wrong',
+              subtitle: state.message,
 
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              button: ElevatedButton.icon(
+                onPressed: () {
+                  context.read<ContactsBloc>().add(
+                    const ContactsEvent.getFavoriteContacts(),
+                  );
+                },
 
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
+                icon: const Icon(Icons.refresh),
 
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
-                        shape: BoxShape.circle,
-                      ),
-
-                      child: const Icon(
-                        Icons.cloud_off_rounded,
-                        color: Colors.red,
-                        size: 42,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      'Something went wrong',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      state.message,
-
-                      textAlign: TextAlign.center,
-
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        context.read<ContactsBloc>().add(
-                          const ContactsEvent.getFavoriteContacts(),
-                        );
-                      },
-
-                      icon: const Icon(Icons.refresh),
-
-                      label: const Text('Try Again'),
-
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(160, 48),
-                      ),
-                    ),
-                  ],
-                ),
+                label: const Text('Try Again'),
               ),
             );
           }
@@ -195,10 +121,8 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
 
           return Stack(
             children: [
-              /// MAIN UI
               Column(
                 children: [
-                  /// SEARCH
                   CustomSearchBar(
                     hintText: 'Search favorites',
 
@@ -206,7 +130,6 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
 
                     onChanged: (_) {
                       _filterContacts(allContacts);
-                      setState(() {});
                     },
 
                     onClear: () {
@@ -215,41 +138,33 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
                     },
                   ),
 
-                  /// COUNT
                   if (allContacts.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                    ContactCountText(count: contacts.length, label: 'favorite'),
 
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-
-                        child: Text(
-                          '${contacts.length} favorite${contacts.length == 1 ? '' : 's'}',
-
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  /// EMPTY UI
                   Expanded(
                     child: contacts.isEmpty
-                        ? emptyWidget()
-                        /// LIST
-                        : contactListWidget(
-                            contacts,
-                            isDeleting,
-                            isFavoriteLoading,
+                        ? StatusView(
+                            icon: Icons.favorite_border,
+                            color: Colors.red.shade300,
+
+                            title: _searchController.text.isNotEmpty
+                                ? 'No favorites found'
+                                : 'No favorite contacts yet',
+
+                            subtitle: _searchController.text.isNotEmpty
+                                ? 'Try searching with another keyword'
+                                : 'Tap the heart icon on contacts to add them here.',
+                          )
+                        : ContactsListView(
+                            contacts: contacts,
+                            isDeleting: isDeleting,
+                            isFavoriteLoading: isFavoriteLoading,
+                            onDelete: _deleteContact,
                           ),
                   ),
                 ],
               ),
 
-              /// FULL SCREEN LOADER
               if (isDeleting)
                 Container(
                   color: Colors.black.withOpacity(0.08),
@@ -259,101 +174,6 @@ class _FavoriteContactsPageState extends State<FavoriteContactsPage> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget contactListWidget(
-    List<ContactEntity> contacts,
-    bool isDeleting,
-    bool isFavoriteLoading,
-  ) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-
-      itemCount: contacts.length,
-
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-
-      itemBuilder: (context, index) {
-        final contact = contacts[index];
-
-        return Opacity(
-          opacity: isDeleting ? 0.7 : 1,
-
-          child: ContactCard(
-            contact: contact,
-
-            onTap: () {
-              context.pushNamed(ContactDetailsPage.routeName, extra: contact);
-            },
-
-            onFavoriteTap: isFavoriteLoading
-                ? () {}
-                : () {
-                    context.read<ContactsBloc>().add(
-                      ContactsEvent.toggleFavorite(contact.id),
-                    );
-                  },
-
-            onDeleteTap: isDeleting
-                ? () {}
-                : () => _confirmDelete(context, contact),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget emptyWidget() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.08),
-
-                shape: BoxShape.circle,
-              ),
-
-              child: Icon(
-                Icons.favorite_border,
-                size: 44,
-                color: Colors.red.shade300,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            Text(
-              _searchController.text.isNotEmpty
-                  ? 'No favorites found'
-                  : 'No favorite contacts yet',
-
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-            ),
-
-            const SizedBox(height: 10),
-
-            Text(
-              _searchController.text.isNotEmpty
-                  ? 'Try searching with another keyword'
-                  : 'Tap the heart icon on contacts to add them here.',
-
-              textAlign: TextAlign.center,
-
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-            ),
-          ],
-        ),
       ),
     );
   }
