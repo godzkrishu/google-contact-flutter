@@ -1,4 +1,4 @@
-package com.example.google_contact
+package com.ultra.contact
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.googleContact</string>
+	<string>com.ultra.contact</string>
 	<key>PROJECT_ID</key>
 	<string>contacts-f95d2</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:969179923560:ios:92f44be2cecc192e43a7dd</string>
+	<string>1:969179923560:ios:82b08c2ceb2684ef43a7dd</string>
 </dict>
 </plist>

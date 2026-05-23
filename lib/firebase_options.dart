@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA4OSCiJCD_Sfc1rBJu765jfVb-J2_feN8',
-    appId: '1:969179923560:android:4f92c8b89a901f9a43a7dd',
+    appId: '1:969179923560:android:fdbbd61547a2404043a7dd',
     messagingSenderId: '969179923560',
     projectId: 'contacts-f95d2',
     storageBucket: 'contacts-f95d2.firebasestorage.app',
@@ -59,11 +59,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCKXDCaQIQkAaHE0tEjLgbsggrGpNu72Gs',
-    appId: '1:969179923560:ios:92f44be2cecc192e43a7dd',
+    appId: '1:969179923560:ios:82b08c2ceb2684ef43a7dd',
     messagingSenderId: '969179923560',
     projectId: 'contacts-f95d2',
     storageBucket: 'contacts-f95d2.firebasestorage.app',
-    iosBundleId: 'com.example.googleContact',
+    iosBundleId: 'com.ultra.contact',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'contacts-f95d2.firebaseapp.com',
     storageBucket: 'contacts-f95d2.firebasestorage.app',
   );
+
 }
