@@ -81,15 +81,18 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
       listener: (BuildContext context, ContactsState state) {
         // SUCCESS
         if (state.addContactStatus == ContactStatus.completed) {
-          AppToast.showSuccess('Contact saved successfully');
+          AppToast.showSuccess('Contact saved successfully $state');
 
           Navigator.pop(context);
         }
 
         // ERROR
         if (state.addContactStatus == ContactStatus.error) {
+
+          print("Thes state mesage o s ${state.message}");
           AppToast.showError(state.message);
         }
+        /// 6445165167
 
         // UPDATE SUCCESS
         if (state.updateContactStatus == ContactStatus.completed) {
@@ -165,9 +168,21 @@ class _AddEditContactPageState extends State<AddEditContactPage> {
                       prefixIcon: Icon(Icons.phone_outlined),
                       border: OutlineInputBorder(),
                     ),
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Phone is required'
-                        : null,
+                    validator: (v) {
+                      if(v == null || v.trim().isEmpty){
+                        return 'Phone is required';
+                      }
+                      if(v.length<10)
+                        {
+                          return "phone number should be 10 digit";
+                        }
+                     int first = int.parse(v[0]);
+                      if(!(first<10&&first>5))
+                        {
+                          return "first digit should be bw 6-9";
+                        }
+                      return null;
+                    }
                   ),
 
                   const SizedBox(height: 16),

@@ -33,3 +33,16 @@ abstract class ContactsState with _$ContactsState {
     String message,
   }) = _ContactsState;
 }
+extension ContactsStateX on ContactsState {
+  ContactsState resetStatuses() {
+    return copyWith(
+      addContactStatus: ContactStatus.initial,
+      updateContactStatus: ContactStatus.initial,
+      deleteContactStatus: ContactStatus.initial,
+      toggleFavoriteStatus: ContactStatus.initial,
+      getContactStatus: ContactStatus.initial,
+      getFavoriteContactStatus: ContactStatus.initial,
+      message: '',
+    );
+  }
+}

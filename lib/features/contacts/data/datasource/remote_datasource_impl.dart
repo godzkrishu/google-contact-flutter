@@ -54,6 +54,7 @@ class ContactsRemoteDataSourceImpl implements ContactsRemoteDataSource {
       throw ApiException('Contact does not exist');
     }
 
+
     await _checkDuplicatePhoneForUpdate(contact);
 
     await firestore

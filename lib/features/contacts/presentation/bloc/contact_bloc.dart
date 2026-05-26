@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
 import '../../../../core/error/api_exception_model.dart';
 import '../../domain/enitities/contact_entity.dart';
 import '../../domain/usecases/add_contact_usecase.dart';
@@ -38,12 +39,20 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     on<_ToggleFavorite>(_onToggleFavorite);
   }
 
+  // =========================
+  // GET CONTACTS
+  // =========================
+
   Future<void> _onGetContacts(
       _GetContacts event,
       Emitter<ContactsState> emit,
       ) async {
     if (state.contacts.isEmpty) {
-      emit(state.copyWith(getContactStatus: ContactStatus.loading));
+      emit(
+        state.resetStatuses().copyWith(
+          getContactStatus: ContactStatus.loading,
+        ),
+      );
     }
 
     await emit.forEach<List<ContactEntity>>(
@@ -54,21 +63,29 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       ),
       onError: (error, stackTrace) => state.copyWith(
         getContactStatus: ContactStatus.error,
-        // error is already a Failure thrown by handleError in the repo
-        message:  error is ApiException
-      ? error.message
-          : error.toString(),
+        message: error is ApiException
+            ? error.message
+            : error.toString(),
       ),
     );
   }
+
+  // =========================
+  // GET FAVORITE CONTACTS
+  // =========================
 
   Future<void> _onGetFavoriteContacts(
       _GetFavoriteContacts event,
       Emitter<ContactsState> emit,
       ) async {
     if (state.favoriteContacts.isEmpty) {
-      emit(state.copyWith(getFavoriteContactStatus: ContactStatus.loading));
+      emit(
+        state.resetStatuses().copyWith(
+          getFavoriteContactStatus: ContactStatus.loading,
+        ),
+      );
     }
+
     await emit.forEach<List<ContactEntity>>(
       getFavoriteContactsUseCase(),
       onData: (contacts) => state.copyWith(
@@ -77,83 +94,150 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       ),
       onError: (error, stackTrace) => state.copyWith(
         getFavoriteContactStatus: ContactStatus.error,
-        message:  error is ApiException
+        message: error is ApiException
             ? error.message
             : error.toString(),
       ),
     );
   }
 
+  // =========================
+  // ADD CONTACT
+  // =========================
+
   Future<void> _onAddContact(
       _AddContact event,
       Emitter<ContactsState> emit,
       ) async {
-    emit(state.copyWith(addContactStatus: ContactStatus.loading));
+    emit(
+      state.resetStatuses().copyWith(
+        addContactStatus: ContactStatus.loading,
+      ),
+    );
+
     final result = await addContactUseCase(event.contact);
+
     result.fold(
-          (failure) => emit(state.copyWith(
-        addContactStatus: ContactStatus.error,
-        message: failure.message,
-      )),
-          (_) => emit(state.copyWith(
-        addContactStatus: ContactStatus.completed,
-      )),
+          (failure) {
+        emit(
+          state.copyWith(
+            addContactStatus: ContactStatus.error,
+            message: failure.message,
+          ),
+        );
+      },
+          (_) {
+        emit(
+          state.copyWith(
+            addContactStatus: ContactStatus.completed,
+          ),
+        );
+      },
     );
   }
+
+  // =========================
+  // UPDATE CONTACT
+  // =========================
 
   Future<void> _onUpdateContact(
       _UpdateContact event,
       Emitter<ContactsState> emit,
       ) async {
-    emit(state.copyWith(updateContactStatus: ContactStatus.loading));
+    emit(
+      state.resetStatuses().copyWith(
+        updateContactStatus: ContactStatus.loading,
+      ),
+    );
 
     final result = await updateContactUseCase(event.contact);
+
     result.fold(
-          (failure) => emit(state.copyWith(
-        updateContactStatus: ContactStatus.error,
-        message: failure.message,
-      )),
-          (_) => emit(state.copyWith(
-        updateContactStatus: ContactStatus.completed,
-      )),
+          (failure) {
+        emit(
+          state.copyWith(
+            updateContactStatus: ContactStatus.error,
+            message: failure.message,
+          ),
+        );
+      },
+          (_) {
+        emit(
+          state.copyWith(
+            updateContactStatus: ContactStatus.completed,
+          ),
+        );
+      },
     );
   }
+
+  // =========================
+  // DELETE CONTACT
+  // =========================
 
   Future<void> _onDeleteContact(
       _DeleteContact event,
       Emitter<ContactsState> emit,
       ) async {
-    emit(state.copyWith(deleteContactStatus: ContactStatus.loading));
+    emit(
+      state.resetStatuses().copyWith(
+        deleteContactStatus: ContactStatus.loading,
+      ),
+    );
 
     final result = await deleteContactUseCase(event.id);
+
     result.fold(
-          (failure) => emit(state.copyWith(
-        deleteContactStatus: ContactStatus.error,
-        message: failure.message,
-      )),
-          (_) => emit(state.copyWith(
-        deleteContactStatus: ContactStatus.completed,
-      )),
+          (failure) {
+        emit(
+          state.copyWith(
+            deleteContactStatus: ContactStatus.error,
+            message: failure.message,
+          ),
+        );
+      },
+          (_) {
+        emit(
+          state.copyWith(
+            deleteContactStatus: ContactStatus.completed,
+          ),
+        );
+      },
     );
   }
+
+  // =========================
+  // TOGGLE FAVORITE
+  // =========================
 
   Future<void> _onToggleFavorite(
       _ToggleFavorite event,
       Emitter<ContactsState> emit,
       ) async {
-    emit(state.copyWith(toggleFavoriteStatus: ContactStatus.loading));
+    emit(
+      state.resetStatuses().copyWith(
+        toggleFavoriteStatus: ContactStatus.loading,
+      ),
+    );
 
     final result = await toggleFavoriteUseCase(event.id);
 
     result.fold(
-          (failure) => emit(state.copyWith(
-        toggleFavoriteStatus: ContactStatus.error,
-        message: failure.message,
-      )),
-          (_) => emit(state.copyWith(
-        toggleFavoriteStatus: ContactStatus.completed,
-      )),
+          (failure) {
+        emit(
+          state.copyWith(
+            toggleFavoriteStatus: ContactStatus.error,
+            message: failure.message,
+          ),
+        );
+      },
+          (_) {
+        emit(
+          state.copyWith(
+            toggleFavoriteStatus: ContactStatus.completed,
+          ),
+        );
+      },
     );
   }
-
 }
